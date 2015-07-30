@@ -1,0 +1,107 @@
+/*
+ * salva-contactos-application.vala
+ * Copyright (C) 2015 Sebastian Barreto <sebastian.e.barreto@gmail.com>
+ *
+ * salva_contactos is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the
+ * Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * salva_contactos is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+using GLib;
+using Gtk;
+using SalvaContactos;
+
+public class SalvaContactos.Application : Gtk.Application {
+    private Gtk.Toolbar toolbar;
+    private Gtk.ToolButton toolbar_button_agregar;
+    private ContactoAgregarDialog guardar_dialog;
+    private Gtk.TreeView view;
+    private ListStoreContactos list_store_contactos;
+
+    public static string db_nombre = "./persistencia/salva_contactos.db";
+
+    public Application () {
+        Object(application_id: "salva.contactos.application",
+            flags: ApplicationFlags.FLAGS_NONE );
+    }
+
+    protected override void activate () {
+        // Se crea la ventana de la app y se la muestra
+        Gtk.ApplicationWindow window = new Gtk.ApplicationWindow (this);
+        window.set_default_size (400, 400);
+        window.window_position = Gtk.WindowPosition.CENTER;
+        window.title = "Salva Contactos";
+
+        Gtk.Box box = new Gtk.Box ( Gtk.Orientation.VERTICAL, 0 );
+        //TOOLBAR
+        box.pack_start ( this.crear_toolbar(), false, false, 0 );
+        //TREEVIEW
+        box.pack_start ( new Gtk.Label ("Contactos"), false, false, 0 );
+        box.pack_start ( this.crear_treeview_contactos (), false, false, 0 );
+        window.add ( box );
+
+        window.show_all ();
+    } //activate
+
+    private Gtk.Toolbar crear_toolbar () {
+        this.toolbar = new Gtk.Toolbar ();
+
+        Gtk.Image icono_boton = new Gtk.Image.from_icon_name ( "document-new", Gtk.IconSize.SMALL_TOOLBAR );
+        this.toolbar_button_agregar = new Gtk.ToolButton ( icono_boton, null );
+        this.toolbar_button_agregar.clicked.connect ( this.crear_dialog_agregar_contacto );
+        toolbar.add ( this.toolbar_button_agregar );
+
+        icono_boton = new Gtk.Image.from_icon_name ( "window-close", Gtk.IconSize.SMALL_TOOLBAR );
+        Gtk.ToolButton toolbar_button_borrar = new Gtk.ToolButton ( icono_boton, null );
+        toolbar_button_borrar.clicked.connect (() => {
+            list_store_contactos.borrar_contacto_seleccionado ();
+        });
+        toolbar.add ( toolbar_button_borrar );
+
+        return toolbar;
+    }
+
+    private Gtk.TreeView crear_treeview_contactos () {
+        list_store_contactos = new ListStoreContactos ();
+        view = new Gtk.TreeView.with_model ( list_store_contactos );
+        Gtk.CellRendererText cell = new Gtk.CellRendererText ();
+        int inserted_at_the_end = -1;
+
+        //Columna "invisible" ID
+        Gtk.TreeViewColumn id_columna_invisible = new Gtk.TreeViewColumn ();
+        id_columna_invisible.set_visible (false);
+        id_columna_invisible.set_expand (false);
+        id_columna_invisible.set_clickable (false);
+        view.insert_column ( id_columna_invisible , 0);
+        //Columnas visibles
+        view.insert_column_with_attributes ( inserted_at_the_end, "Nombre", cell, "text", 1 );
+        view.insert_column_with_attributes ( inserted_at_the_end, "Apellido", cell, "text", 2 );
+        view.insert_column_with_attributes ( inserted_at_the_end, "Descripcion", cell, "text", 3 );
+
+        list_store_contactos.seleccionado = view.get_selection ();
+        list_store_contactos.seleccionado.changed.connect ( list_store_contactos.seleccionar_contacto );
+
+        return view;
+    }
+
+    public void crear_dialog_agregar_contacto () {
+        if ( !ContactoAgregarDialog.activo ) {
+            guardar_dialog = new ContactoAgregarDialog ();
+            guardar_dialog.show ();
+
+            if ( guardar_dialog.run() == ResponseType.APPLY ) {
+                this.list_store_contactos.agregar_contacto ( guardar_dialog.contacto_por_agregar );
+            }
+            guardar_dialog.destroy();
+        }
+    }
+}
