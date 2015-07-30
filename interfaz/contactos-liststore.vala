@@ -60,14 +60,9 @@ public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
         }
     }
 
-    public void agregar_contacto ( Contacto contacto ) {
-        Gtk.TreeIter iter;
-        this.append (out iter);
-
-        this.set (iter,
-            COLUMNAS.NOMBRE, contacto.nombre,
-            COLUMNAS.APELLIDO, contacto.apellido,
-            COLUMNAS.DESCRIPCION, contacto.descripcion);
+    public void recargar_liststore ( ) {
+        this.clear ();
+        this.cargar_liststore ();
     }
 
     public void borrar_contacto_seleccionado ( ) {

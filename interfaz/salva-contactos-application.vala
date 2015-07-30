@@ -99,7 +99,7 @@ public class SalvaContactos.Application : Gtk.Application {
             guardar_dialog.show ();
 
             if ( guardar_dialog.run() == ResponseType.APPLY ) {
-                this.list_store_contactos.agregar_contacto ( guardar_dialog.contacto_por_agregar );
+                this.list_store_contactos.recargar_liststore ( );
             }
             guardar_dialog.destroy();
         }
