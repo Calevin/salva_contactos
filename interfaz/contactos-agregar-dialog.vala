@@ -24,15 +24,15 @@ public class SalvaContactos.ContactoAgregarDialog : Dialog {
     private Gtk.Entry apellido_entry;
     private Gtk.Entry descripcion_entry;
     private Gtk.Widget guardar_boton;
-    public static bool activo = false;
     private ContactoDao contacto_dao;
     public Contacto contacto_por_agregar { public get; public set; }
 
     public ContactoAgregarDialog () {
-        ContactoAgregarDialog.activo = true;
         this.title = "Agregar Contacto";
+        this.set_modal ( true );
         this.border_width = 5;
         set_default_size ( 350, 100 );
+
         this.crear_widgets ();
         this.conectar_signals ();
 
@@ -95,7 +95,6 @@ public class SalvaContactos.ContactoAgregarDialog : Dialog {
             this.on_guardar_clicked ();
             break;
         case Gtk.ResponseType.CLOSE:
-            ContactoAgregarDialog.activo = false;
             this.destroy ();
         break;
         }

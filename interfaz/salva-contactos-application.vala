@@ -94,7 +94,6 @@ public class SalvaContactos.Application : Gtk.Application {
     }
 
     public void crear_dialog_agregar_contacto () {
-        if ( !ContactoAgregarDialog.activo ) {
             guardar_dialog = new ContactoAgregarDialog ();
             guardar_dialog.show ();
 
@@ -102,6 +101,5 @@ public class SalvaContactos.Application : Gtk.Application {
                 this.list_store_contactos.recargar_liststore ( );
             }
             guardar_dialog.destroy();
-        }
     }
 }
