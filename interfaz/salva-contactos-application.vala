@@ -24,8 +24,16 @@ public class SalvaContactos.Application : Gtk.Application {
     private Gtk.Toolbar toolbar;
     private Gtk.ToolButton toolbar_button_agregar;
     private ContactoAgregarDialog guardar_dialog;
+    private ContactoEditarDialog editar_dialog;
     private Gtk.TreeView view;
     private ListStoreContactos list_store_contactos;
+
+    enum TOOLBAR_ITEMS {
+        NUEVO,
+        BORRAR,
+        EDITAR,
+        N_ITEMS
+    }
 
     public static string db_nombre = "./persistencia/salva_contactos.db";
 
@@ -55,17 +63,24 @@ public class SalvaContactos.Application : Gtk.Application {
     private Gtk.Toolbar crear_toolbar () {
         this.toolbar = new Gtk.Toolbar ();
 
-        Gtk.Image icono_boton = new Gtk.Image.from_icon_name ( "document-new", Gtk.IconSize.SMALL_TOOLBAR );
+        Gtk.Image icono_boton = new Gtk.Image.from_icon_name ( "contact-new", Gtk.IconSize.SMALL_TOOLBAR );
         this.toolbar_button_agregar = new Gtk.ToolButton ( icono_boton, null );
         this.toolbar_button_agregar.clicked.connect ( this.crear_dialog_agregar_contacto );
         toolbar.add ( this.toolbar_button_agregar );
 
-        icono_boton = new Gtk.Image.from_icon_name ( "window-close", Gtk.IconSize.SMALL_TOOLBAR );
+        icono_boton = new Gtk.Image.from_icon_name ( "edit-delete", Gtk.IconSize.SMALL_TOOLBAR );
         Gtk.ToolButton toolbar_button_borrar = new Gtk.ToolButton ( icono_boton, null );
         toolbar_button_borrar.clicked.connect (() => {
             list_store_contactos.borrar_contacto_seleccionado ();
         });
+        toolbar_button_borrar.set_sensitive ( false );
         toolbar.add ( toolbar_button_borrar );
+
+        icono_boton = new Gtk.Image.from_icon_name ( "accessories-text-editor", Gtk.IconSize.SMALL_TOOLBAR );
+        Gtk.ToolButton toolbar_button_editar = new Gtk.ToolButton ( icono_boton, null );
+        toolbar_button_editar.clicked.connect ( this.crear_dialog_editar_contacto );
+        toolbar_button_editar.set_sensitive ( false );
+        toolbar.add ( toolbar_button_editar );
 
         return toolbar;
     }
@@ -88,7 +103,7 @@ public class SalvaContactos.Application : Gtk.Application {
         view.insert_column_with_attributes ( inserted_at_the_end, "Descripcion", cell, "text", 3 );
 
         list_store_contactos.seleccionado = view.get_selection ();
-        list_store_contactos.seleccionado.changed.connect ( list_store_contactos.seleccionar_contacto );
+        list_store_contactos.seleccionado.changed.connect ( this.seleccionado_on_changed );
 
         return view;
     }
@@ -98,8 +113,32 @@ public class SalvaContactos.Application : Gtk.Application {
             guardar_dialog.show ();
 
             if ( guardar_dialog.run() == ResponseType.APPLY ) {
-                this.list_store_contactos.recargar_liststore ( );
+                this.list_store_contactos.recargar_liststore ();
             }
             guardar_dialog.destroy();
+            list_store_contactos.seleccionado.unselect_all ();
+            this.toolbar_borrar_editar_activar ( false );
+    }
+
+    public void crear_dialog_editar_contacto () {
+            editar_dialog = new ContactoEditarDialog ( list_store_contactos.seleccionado );
+            editar_dialog.show ();
+
+            if ( editar_dialog.run() == ResponseType.APPLY ) {
+                this.list_store_contactos.recargar_liststore ();
+            }
+            editar_dialog.destroy();
+            list_store_contactos.seleccionado.unselect_all ();
+            this.toolbar_borrar_editar_activar ( false );
+    }
+
+    public void seleccionado_on_changed () {
+        list_store_contactos.seleccionar_contacto ( list_store_contactos.seleccionado );
+        this.toolbar_borrar_editar_activar ( true );
+    }
+
+    private void toolbar_borrar_editar_activar (bool activar) {
+        (this.toolbar.get_nth_item (TOOLBAR_ITEMS.BORRAR)).set_sensitive ( activar );
+        (this.toolbar.get_nth_item (TOOLBAR_ITEMS.EDITAR)).set_sensitive ( activar );
     }
 }

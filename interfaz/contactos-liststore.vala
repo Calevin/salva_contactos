@@ -81,6 +81,7 @@ public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
                 }
             } while ( this.iter_next (ref iter) );
         }
+        this.id_contacto_seleccionado = 0;
     }
 
     public void seleccionar_contacto ( Gtk.TreeSelection selection ) {
