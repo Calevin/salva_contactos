@@ -58,12 +58,15 @@ public class SalvaContactos.TelefonosBox {
     }
 
     private void agregar_numero_listbox_numeros ( Array<Salva.Entidad> telefonos ) {
-        string label_numero = "";
+        string string_numero = "";
+        Gtk.Label label_numero;
         Telefono row_telefono;
         for (int i = 0; i < telefonos.length; i++) {
             row_telefono = telefonos.index (i) as Telefono;
-            label_numero = "Numero: %s (%s)".printf ( row_telefono.numero.to_string () , row_telefono.tipo );
-            this.listbox_numeros.add (new Gtk.Label( label_numero ) );
+            string_numero = "Numero: %s (%s)".printf ( row_telefono.numero.to_string () , row_telefono.tipo );
+            label_numero = new Gtk.Label( string_numero );
+            label_numero.set_alignment ( 0, 0);
+            this.listbox_numeros.add ( label_numero );
             this.hay_numeros_cargados = true;
         }
     }
