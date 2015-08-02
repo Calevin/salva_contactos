@@ -29,6 +29,7 @@ public class SalvaContactos.Application : Gtk.Application {
     private ContactoEditarDialog editar_dialog;
     private Gtk.TreeView view;
     private ListStoreContactos list_store_contactos;
+    private TelefonosBox telefonos_box;
 
     enum TOOLBAR_ITEMS {
         NUEVO,
@@ -45,19 +46,20 @@ public class SalvaContactos.Application : Gtk.Application {
     }
 
     protected override void activate () {
-        // Se crea la ventana de la app y se la muestra
         Gtk.ApplicationWindow window = new Gtk.ApplicationWindow (this);
         window.set_default_size (400, 400);
         window.window_position = Gtk.WindowPosition.CENTER;
         window.set_titlebar ( this.crear_headerbar () );
 
-        Gtk.Box box = new Gtk.Box ( Gtk.Orientation.VERTICAL, 0 );
-        //TREEVIEW
-        box.pack_start ( this.crear_treeview_contactos (), false, false, 0 );
-        window.add ( box );
+        Gtk.Paned paned = new Gtk.Paned (Gtk.Orientation.HORIZONTAL);
+        paned.add1 ( this.crear_treeview_contactos () );
+        telefonos_box = this.crear_telefonosbox ();
+        paned.add2 ( telefonos_box.box_numeros );
+
+        window.add ( paned );
 
         window.show_all ();
-    } //activate
+    }
 
     private Gtk.HeaderBar crear_headerbar () {
         this.headerbar = new Gtk.HeaderBar ();
@@ -107,6 +109,11 @@ public class SalvaContactos.Application : Gtk.Application {
         return view;
     }
 
+    private TelefonosBox crear_telefonosbox () {
+        telefonos_box = new TelefonosBox ();
+        return telefonos_box;
+    }
+
     public void crear_dialog_agregar_contacto () {
             guardar_dialog = new ContactoAgregarDialog ();
             guardar_dialog.show ();
@@ -117,6 +124,7 @@ public class SalvaContactos.Application : Gtk.Application {
             guardar_dialog.destroy();
             list_store_contactos.seleccionado.unselect_all ();
             this.headerbar_borrar_editar_activar ( false );
+            this.telefonos_box.limpiar_listbox_numeros ();
     }
 
     public void crear_dialog_editar_contacto () {
@@ -129,11 +137,13 @@ public class SalvaContactos.Application : Gtk.Application {
             editar_dialog.destroy();
             list_store_contactos.seleccionado.unselect_all ();
             this.headerbar_borrar_editar_activar ( false );
+            this.telefonos_box.limpiar_listbox_numeros ();
     }
 
     public void seleccionado_on_changed () {
         list_store_contactos.seleccionar_contacto ( list_store_contactos.seleccionado );
         this.headerbar_borrar_editar_activar ( true );
+        this.telefonos_box.cargar_numeros ( list_store_contactos.id_contacto_seleccionado );
     }
 
     private void headerbar_borrar_editar_activar (bool activar) {
