@@ -21,8 +21,10 @@ using Gtk;
 using SalvaContactos;
 
 public class SalvaContactos.Application : Gtk.Application {
-    private Gtk.Toolbar toolbar;
-    private Gtk.ToolButton toolbar_button_agregar;
+    private Gtk.HeaderBar headerbar;
+    private Gtk.Button headerbar_button_agregar;
+    private Gtk.Button headerbar_button_borrar;
+    private Gtk.Button headerbar_button_editar;
     private ContactoAgregarDialog guardar_dialog;
     private ContactoEditarDialog editar_dialog;
     private Gtk.TreeView view;
@@ -47,42 +49,39 @@ public class SalvaContactos.Application : Gtk.Application {
         Gtk.ApplicationWindow window = new Gtk.ApplicationWindow (this);
         window.set_default_size (400, 400);
         window.window_position = Gtk.WindowPosition.CENTER;
-        window.title = "Salva Contactos";
+        window.set_titlebar ( this.crear_headerbar () );
 
         Gtk.Box box = new Gtk.Box ( Gtk.Orientation.VERTICAL, 0 );
-        //TOOLBAR
-        box.pack_start ( this.crear_toolbar(), false, false, 0 );
         //TREEVIEW
-        box.pack_start ( new Gtk.Label ("Contactos"), false, false, 0 );
         box.pack_start ( this.crear_treeview_contactos (), false, false, 0 );
         window.add ( box );
 
         window.show_all ();
     } //activate
 
-    private Gtk.Toolbar crear_toolbar () {
-        this.toolbar = new Gtk.Toolbar ();
+    private Gtk.HeaderBar crear_headerbar () {
+        this.headerbar = new Gtk.HeaderBar ();
+        headerbar.set_show_close_button (true);
+        headerbar.set_title ("Salva Contactos");
+        headerbar.set_subtitle ("Contactos");
 
-        Gtk.Image icono_boton = new Gtk.Image.from_icon_name ( "contact-new", Gtk.IconSize.SMALL_TOOLBAR );
-        this.toolbar_button_agregar = new Gtk.ToolButton ( icono_boton, null );
-        this.toolbar_button_agregar.clicked.connect ( this.crear_dialog_agregar_contacto );
-        toolbar.add ( this.toolbar_button_agregar );
+        this.headerbar_button_agregar = new Gtk.Button.from_icon_name ( "contact-new", Gtk.IconSize.SMALL_TOOLBAR );
+        this.headerbar_button_agregar.clicked.connect ( this.crear_dialog_agregar_contacto );
+        headerbar.add ( this.headerbar_button_agregar );
 
-        icono_boton = new Gtk.Image.from_icon_name ( "edit-delete", Gtk.IconSize.SMALL_TOOLBAR );
-        Gtk.ToolButton toolbar_button_borrar = new Gtk.ToolButton ( icono_boton, null );
-        toolbar_button_borrar.clicked.connect (() => {
+        this.headerbar_button_borrar = new Gtk.Button.from_icon_name ( "edit-delete", Gtk.IconSize.SMALL_TOOLBAR );
+        headerbar_button_borrar.clicked.connect (() => {
             list_store_contactos.borrar_contacto_seleccionado ();
         });
-        toolbar_button_borrar.set_sensitive ( false );
-        toolbar.add ( toolbar_button_borrar );
+        headerbar_button_borrar.set_sensitive ( false );
+        headerbar.add ( headerbar_button_borrar );
 
-        icono_boton = new Gtk.Image.from_icon_name ( "accessories-text-editor", Gtk.IconSize.SMALL_TOOLBAR );
-        Gtk.ToolButton toolbar_button_editar = new Gtk.ToolButton ( icono_boton, null );
-        toolbar_button_editar.clicked.connect ( this.crear_dialog_editar_contacto );
-        toolbar_button_editar.set_sensitive ( false );
-        toolbar.add ( toolbar_button_editar );
+        this.headerbar_button_editar = new Gtk.Button.from_icon_name ( "accessories-text-editor", Gtk.IconSize.SMALL_TOOLBAR  );
+        headerbar_button_editar.clicked.connect ( this.crear_dialog_editar_contacto );
+        headerbar_button_editar.set_sensitive ( false );
+        headerbar.add ( headerbar_button_editar );
 
-        return toolbar;
+        return headerbar;
     }
 
     private Gtk.TreeView crear_treeview_contactos () {
@@ -117,7 +116,7 @@ public class SalvaContactos.Application : Gtk.Application {
             }
             guardar_dialog.destroy();
             list_store_contactos.seleccionado.unselect_all ();
-            this.toolbar_borrar_editar_activar ( false );
+            this.headerbar_borrar_editar_activar ( false );
     }
 
     public void crear_dialog_editar_contacto () {
@@ -129,16 +128,16 @@ public class SalvaContactos.Application : Gtk.Application {
             }
             editar_dialog.destroy();
             list_store_contactos.seleccionado.unselect_all ();
-            this.toolbar_borrar_editar_activar ( false );
+            this.headerbar_borrar_editar_activar ( false );
     }
 
     public void seleccionado_on_changed () {
         list_store_contactos.seleccionar_contacto ( list_store_contactos.seleccionado );
-        this.toolbar_borrar_editar_activar ( true );
+        this.headerbar_borrar_editar_activar ( true );
     }
 
-    private void toolbar_borrar_editar_activar (bool activar) {
-        (this.toolbar.get_nth_item (TOOLBAR_ITEMS.BORRAR)).set_sensitive ( activar );
-        (this.toolbar.get_nth_item (TOOLBAR_ITEMS.EDITAR)).set_sensitive ( activar );
+    private void headerbar_borrar_editar_activar (bool activar) {
+        this.headerbar_button_borrar.set_sensitive ( activar );
+        this.headerbar_button_editar.set_sensitive ( activar );
     }
 }
