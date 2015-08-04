@@ -20,12 +20,20 @@ using Salva;
 public class SalvaContactos.Telefono : Salva.Entidad {
     public uint numero { public get; public set; }
     public string tipo { public get; public set; }
-    public string descripcion { public get; public set; }
+    public uint contacto_rowid { public get; public set; }
 
-    public Telefono ( uint id, uint numero, string tipo ) {
+    public Telefono ( uint id, uint numero, string tipo, uint contacto_rowid ) {
         base ( id );
         this._numero = numero;
         this._tipo = tipo;
+        this._contacto_rowid = contacto_rowid;
+    }
+
+    public Telefono.Telefono_sin_id ( uint numero, string tipo, uint contacto_rowid ) {
+        base.Entidad_sin_id ( );
+        this._numero = numero;
+        this._tipo = tipo;
+        this._contacto_rowid = contacto_rowid;
     }
 
     public Telefono.Telefono_id ( uint id ) {

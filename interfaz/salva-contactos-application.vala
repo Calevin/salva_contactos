@@ -47,7 +47,7 @@ public class SalvaContactos.Application : Gtk.Application {
 
     protected override void activate () {
         Gtk.ApplicationWindow window = new Gtk.ApplicationWindow (this);
-        window.set_default_size (400, 400);
+        window.set_default_size (500, 750);
         window.window_position = Gtk.WindowPosition.CENTER;
         window.set_titlebar ( this.crear_headerbar () );
 
@@ -125,6 +125,7 @@ public class SalvaContactos.Application : Gtk.Application {
             list_store_contactos.seleccionado.unselect_all ();
             this.headerbar_borrar_editar_activar ( false );
             this.telefonos_box.limpiar_listbox_numeros ();
+            this.telefonos_box.boton_agregar_activar ( false );
     }
 
     public void crear_dialog_editar_contacto () {
@@ -138,12 +139,14 @@ public class SalvaContactos.Application : Gtk.Application {
             list_store_contactos.seleccionado.unselect_all ();
             this.headerbar_borrar_editar_activar ( false );
             this.telefonos_box.limpiar_listbox_numeros ();
+            this.telefonos_box.boton_agregar_activar ( false );
     }
 
     public void seleccionado_on_changed () {
         list_store_contactos.seleccionar_contacto ( list_store_contactos.seleccionado );
         this.headerbar_borrar_editar_activar ( true );
         this.telefonos_box.cargar_numeros ( list_store_contactos.id_contacto_seleccionado );
+        this.telefonos_box.boton_agregar_activar ( true );
     }
 
     private void headerbar_borrar_editar_activar (bool activar) {

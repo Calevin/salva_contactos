@@ -8,6 +8,7 @@ SOURCE_FILES_MAIN= \
 	./interfaz/contactos-agregar-dialog.vala \
 	./interfaz/contactos-editar-dialog.vala \
 	./interfaz/telefonos-box.vala \
+	./interfaz/telefonos-agregar-dialog.vala \
 	$(NULL)
 
 SOURCE_FILES_ENTITIES= \

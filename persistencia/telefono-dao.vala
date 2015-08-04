@@ -18,9 +18,9 @@
 using Salva;
 
 public class SalvaContactos.TelefonoDao : Salva.EntidadDAO {
-    private string[] _propiedades = {"id", "numero", "tipo"};
+    private string[] _propiedades = {"id", "numero", "tipo", "contacto_rowid"};
     private string _nombre_tabla = "telefonos";
-    private string _columnas_tabla = "rowid, numero, tipo";
+    private string _columnas_tabla = "rowid, numero, tipo, contacto_rowid";
     private Type _tipo_entidad = typeof ( SalvaContactos.Telefono );
     private Salva.BaseDeDatos _db;
 
