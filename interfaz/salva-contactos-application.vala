@@ -110,7 +110,7 @@ public class SalvaContactos.Application : Gtk.Application {
     }
 
     private TelefonosBox crear_telefonosbox () {
-        telefonos_box = new TelefonosBox ();
+        telefonos_box = new TelefonosBox ( list_store_contactos.id_contacto_seleccionado );
         return telefonos_box;
     }
 
@@ -120,11 +120,11 @@ public class SalvaContactos.Application : Gtk.Application {
 
             if ( guardar_dialog.run() == ResponseType.APPLY ) {
                 this.list_store_contactos.recargar_liststore ();
+                this.telefonos_box.recargar_telefonos ( 0 );
             }
             guardar_dialog.destroy();
             list_store_contactos.seleccionado.unselect_all ();
             this.headerbar_borrar_editar_activar ( false );
-            this.telefonos_box.limpiar_listbox_numeros ();
             this.telefonos_box.boton_agregar_activar ( false );
     }
 
@@ -134,18 +134,18 @@ public class SalvaContactos.Application : Gtk.Application {
 
             if ( editar_dialog.run() == ResponseType.APPLY ) {
                 this.list_store_contactos.recargar_liststore ();
+                this.telefonos_box.recargar_telefonos ( 0 );
             }
             editar_dialog.destroy();
             list_store_contactos.seleccionado.unselect_all ();
             this.headerbar_borrar_editar_activar ( false );
-            this.telefonos_box.limpiar_listbox_numeros ();
             this.telefonos_box.boton_agregar_activar ( false );
     }
 
     public void seleccionado_on_changed () {
         list_store_contactos.seleccionar_contacto ( list_store_contactos.seleccionado );
+        this.telefonos_box.recargar_telefonos ( list_store_contactos.id_contacto_seleccionado );
         this.headerbar_borrar_editar_activar ( true );
-        this.telefonos_box.cargar_numeros ( list_store_contactos.id_contacto_seleccionado );
         this.telefonos_box.boton_agregar_activar ( true );
     }
 

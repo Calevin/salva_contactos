@@ -110,8 +110,11 @@ public class SalvaContactos.ContactoEditarDialog : Dialog {
             this.nombre_entry.text,
             this.apellido_entry.text,
             this.descripcion_entry.text );
-
-        this.contacto_dao.actualizar ( contacto_por_editar );
+        try {
+            this.contacto_dao.actualizar ( contacto_por_editar );
+        } catch ( BaseDeDatosError e ) {
+            stderr.printf ( "ERROR: %s", e.message );
+        }
     }
 
     private void cargar_contacto () {

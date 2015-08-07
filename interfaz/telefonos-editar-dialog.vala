@@ -1,5 +1,5 @@
 /*
- * telefonos-agregar-dialog.vala
+ * telefonos-editor-dialog.vala
  * Copyright (C) 2015 Sebastian Barreto <sebastian.e.barreto@gmail.com>
  *
  * salva_contactos is free software: you can redistribute it and/or modify it
@@ -19,24 +19,28 @@ using GLib;
 using Gtk;
 using SalvaContactos;
 
-public class SalvaContactos.TelefonoAgregarDialog : Dialog {
+public class SalvaContactos.TelefonoEditarDialog : Dialog {
     private Gtk.Entry numero_entry;
     private Gtk.Entry tipo_entry;
     private Gtk.Widget guardar_boton;
     private TelefonoDao telefono_dao;
     public Telefono telefono_por_agregar { public get; public set; }
     private uint id_contacto_seleccionado;
+    private uint id_telefono_seleccionado;
+    private Gtk.TreeSelection seleccionado;
 
-    public TelefonoAgregarDialog ( uint contacto_id ) {
-        this.title = "Agregar Telefono";
+    public TelefonoEditarDialog ( Gtk.TreeSelection seleccionado, uint contacto_id ) {
+        this.title = "Editor Telefono";
         this.set_modal ( true );
         this.border_width = 5;
         this.set_default_size ( 350, 100 );
 
+        this.seleccionado = seleccionado;
         this.id_contacto_seleccionado = contacto_id;
 
         this.crear_widgets ();
         this.conectar_signals ();
+        this.cargar_telefono ();
 
         this.telefono_dao = new TelefonoDao ();
         this.telefono_dao.set_db ( new Salva.BaseDeDatos ( Application.db_nombre ) );
@@ -96,14 +100,32 @@ public class SalvaContactos.TelefonoAgregarDialog : Dialog {
     }
 
     private void on_guardar_clicked () {
-        this.telefono_por_agregar = new Telefono.Telefono_sin_id (
+        this.telefono_por_agregar = new Telefono (
+            this.id_telefono_seleccionado,
             int.parse ( this.numero_entry.text ),
             this.tipo_entry.text,
             this.id_contacto_seleccionado );
         try {
-            this.telefono_dao.insertar ( telefono_por_agregar );
+            this.telefono_dao.actualizar ( telefono_por_agregar );
         } catch ( BaseDeDatosError e ) {
             stderr.printf ( "ERROR: %s", e.message );
+        }
+    }
+
+    public void cargar_telefono () {
+        Gtk.TreeModel model;
+        Gtk.TreeIter iter;
+        uint id;
+        uint numero;
+        string tipo;
+
+        if (this.seleccionado.get_selected (out model, out iter)) {
+            model.get (iter, ListStoreTelefonos.COLUMNAS.ID, out id);
+            model.get (iter, ListStoreTelefonos.COLUMNAS.NUMERO, out numero);
+            model.get (iter, ListStoreTelefonos.COLUMNAS.TIPO, out tipo);
+            this.id_telefono_seleccionado = id;
+            this.numero_entry.text = numero.to_string ();
+            this.tipo_entry.text = tipo;
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * contactos-liststore.vala
+ * telefonos-liststore.vala
  * Copyright (C) 2015 Sebastian Barreto <sebastian.e.barreto@gmail.com>
  *
  * salva_contactos is free software: you can redistribute it and/or modify it
@@ -19,48 +19,48 @@ using GLib;
 using Gtk;
 using SalvaContactos;
 
-public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
-    public Array<Salva.Entidad> contactos { public get; public set; }
-    private ContactoDao contacto_dao;
+public class SalvaContactos.ListStoreTelefonos : Gtk.ListStore {
+    public Array<Salva.Entidad> telefonos { public get; public set; }
+    private TelefonoDao telefono_dao;
     public Gtk.TreeSelection seleccionado { public get; public set; }
     public uint id_contacto_seleccionado { public get; public set; }
-    public Contacto contacto_seleccionado { public get; public set; }
+    public uint id_telefono_seleccionado { public get; public set; }
 
     enum COLUMNAS {
         ID,
-        NOMBRE,
-        APELLIDO,
-        DESCRIPCION,
+        NUMERO,
+        TIPO,
         N_COLUMNAS
     }
 
-    public ListStoreContactos () {
-        Type[] tipos = { typeof (uint), typeof (string), typeof (string), typeof (string) };
+    public ListStoreTelefonos (uint id_contacto_seleccionado) {
+        Type[] tipos = { typeof (uint), typeof (uint), typeof (string) };
         this.set_column_types ( tipos );
 
-        this.contacto_dao = new ContactoDao ();
-        this.contacto_dao.set_db ( new Salva.BaseDeDatos ( Application.db_nombre ) );
+        this.telefono_dao = new TelefonoDao ();
+        this.telefono_dao.set_db ( new Salva.BaseDeDatos ( Application.db_nombre ) );
+
+        this.id_contacto_seleccionado = id_contacto_seleccionado;
 
         this.cargar_liststore ();
     }
 
     public void cargar_liststore () {
         Gtk.TreeIter iter;
+        string condicion_join = "contacto_rowid=%s".printf ( this.id_contacto_seleccionado.to_string () );
         try {
-            this.contactos = this.contacto_dao.get_todos ();
+            this.telefonos = this.telefono_dao.get_todos_segun_condicion ( condicion_join );
         } catch ( BaseDeDatosError e ) {
             stderr.printf ( "ERROR: %s", e.message );
         }
-        Contacto contacto;
-        for (int i = 0; i < this.contactos.length; i++) {
-            contacto = this.contactos.index (i) as Contacto;
-
+        Telefono telefono;
+        for (int i = 0; i < this.telefonos.length; i++) {
+            telefono = this.telefonos.index (i) as Telefono;
             this.append (out iter);
             this.set (iter,
-                COLUMNAS.ID, contacto.id,
-                COLUMNAS.NOMBRE, contacto.nombre,
-                COLUMNAS.APELLIDO, contacto.apellido,
-                COLUMNAS.DESCRIPCION, contacto.descripcion);
+                COLUMNAS.ID, telefono.id,
+                COLUMNAS.NUMERO, telefono.numero,
+                COLUMNAS.TIPO, telefono.tipo);
         }
     }
 
@@ -69,10 +69,10 @@ public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
         this.cargar_liststore ();
     }
 
-    public void borrar_contacto_seleccionado ( ) {
+    public void borrar_telefono_seleccionado ( ) {
         try {
         //Borrar de la base
-            this.contacto_dao.borrar ( new Contacto.Contacto_id (this.id_contacto_seleccionado) );
+            this.telefono_dao.borrar ( new Telefono.Telefono_id (this.id_telefono_seleccionado) );
         } catch ( BaseDeDatosError e ) {
             stderr.printf ( "ERROR: %s", e.message );
         }
@@ -83,23 +83,23 @@ public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
             do {
                 this.get_value( iter, COLUMNAS.ID, out id_row );
 
-                if ( this.id_contacto_seleccionado == id_row.get_uint () ) {
+                if ( this.id_telefono_seleccionado == id_row.get_uint () ) {
                     this.remove (iter);
                     break;
                 }
             } while ( this.iter_next (ref iter) );
         }
-        this.id_contacto_seleccionado = 0;
+        this.id_telefono_seleccionado = 0;
     }
 
-    public void seleccionar_contacto ( Gtk.TreeSelection selection ) {
+    public void seleccionar_telefono ( Gtk.TreeSelection selection ) {
         Gtk.TreeModel model;
         Gtk.TreeIter iter;
         uint id;
 
         if (seleccionado.get_selected (out model, out iter)) {
             model.get (iter, COLUMNAS.ID, out id);
-            this.id_contacto_seleccionado = id;
+            this.id_telefono_seleccionado = id;
         }
     }
 }

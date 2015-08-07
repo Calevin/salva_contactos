@@ -31,7 +31,7 @@ public class SalvaContactos.ContactoAgregarDialog : Dialog {
         this.title = "Agregar Contacto";
         this.set_modal ( true );
         this.border_width = 5;
-        set_default_size ( 350, 100 );
+        this.set_default_size ( 350, 100 );
 
         this.crear_widgets ();
         this.conectar_signals ();
@@ -105,7 +105,10 @@ public class SalvaContactos.ContactoAgregarDialog : Dialog {
             this.nombre_entry.text,
             this.apellido_entry.text,
             this.descripcion_entry.text );
-
-        this.contacto_dao.insertar ( contacto_por_agregar );
+        try {
+            this.contacto_dao.insertar ( contacto_por_agregar );
+        } catch ( BaseDeDatosError e ) {
+            stderr.printf ( "ERROR: %s", e.message );
+        }
     }
 }

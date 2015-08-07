@@ -25,25 +25,19 @@ public class SalvaContactos.TelefonosBox {
     private Gtk.Button numeros_button_editar;
     private Gtk.Button numeros_button_borrar;
     public Gtk.Box box_numeros { public get; public set; }
-    private Gtk.ListBox listbox_numeros { public get; public set; }
-    private ContactoDao contacto_dao;
-    private TelefonoDao telefono_dao;
-    public bool hay_numeros_cargados { public get; private set; default = false; }
+    private Gtk.TreeView view;
+    private ListStoreTelefonos list_store_telefonos;
     private uint id_contacto_seleccionado;
-    TelefonoAgregarDialog guardar_dialog;
+    private TelefonoAgregarDialog guardar_dialog;
+    private TelefonoEditarDialog editar_dialog;
 
-    public TelefonosBox () {
+    public TelefonosBox ( uint id_contacto_seleccionado ) {
         this.box_numeros = new Gtk.Box ( Gtk.Orientation.VERTICAL, 0 );
         this.box_numeros.add ( new Gtk.Label ( "Numeros" ) );
         this.box_numeros.add ( new Gtk.Separator ( Gtk.Orientation.HORIZONTAL ));
 
-        this.crear_listbox_numeros ();
-        //DAOs
-        contacto_dao = new ContactoDao ();
-        telefono_dao = new TelefonoDao ();
-        BaseDeDatos db = new BaseDeDatos ( Application.db_nombre );
-        contacto_dao.set_db ( db );
-        telefono_dao.set_db ( db );
+        this.id_contacto_seleccionado = id_contacto_seleccionado;
+        this.box_numeros.add ( this.crear_treeview_telefonos () );
 
         Gtk.Box secondary_box = new Gtk.Box (Gtk.Orientation.HORIZONTAL, 3);
 
@@ -52,45 +46,45 @@ public class SalvaContactos.TelefonosBox {
         numeros_button_agregar.set_sensitive ( false );
         secondary_box.pack_start ( numeros_button_agregar );
         numeros_button_editar = new Gtk.Button.with_label  ("Editar");
-        secondary_box.pack_start ( numeros_button_editar );
+        numeros_button_editar.clicked.connect ( this.crear_dialog_editar_telefono );
         numeros_button_editar.set_sensitive ( false );
+        secondary_box.pack_start ( numeros_button_editar );
         numeros_button_borrar = new Gtk.Button.from_icon_name ("list-remove", Gtk.IconSize.SMALL_TOOLBAR);
+        numeros_button_borrar.clicked.connect (() => {
+            list_store_telefonos.borrar_telefono_seleccionado ();
+        });
         secondary_box.pack_start ( numeros_button_borrar );
         numeros_button_borrar.set_sensitive ( false );
 
         this.box_numeros.pack_end ( secondary_box ,false );
     }
 
-    public void crear_listbox_numeros () {
-        this.listbox_numeros = new Gtk.ListBox ();
-        this.listbox_numeros.set_activate_on_single_click( true );
-        this.listbox_numeros.set_selection_mode( Gtk.SelectionMode.SINGLE );
-        this.listbox_numeros.set_placeholder( new Gtk.Label( null ) );
-        this.listbox_numeros.row_selected.connect( on_row_numeros_selected );
-        this.box_numeros.add ( this.listbox_numeros );
+    public void recargar_telefonos ( uint id_contacto_seleccionado ) {
+        this.id_contacto_seleccionado = id_contacto_seleccionado;
+        list_store_telefonos.id_contacto_seleccionado = id_contacto_seleccionado;
+        list_store_telefonos.recargar_liststore ( );
     }
 
-    public void limpiar_listbox_numeros () {
-        if ( this.hay_numeros_cargados ) {
-            this.botones_borrar_editar_activar ( false );
-            this.box_numeros.remove ( this.listbox_numeros );
-            this.listbox_numeros = null;
-            this.hay_numeros_cargados = false;
-        }
-    }
+    private Gtk.TreeView crear_treeview_telefonos () {
+        list_store_telefonos = new ListStoreTelefonos ( this.id_contacto_seleccionado );
+        view = new Gtk.TreeView.with_model ( list_store_telefonos );
+        Gtk.CellRendererText cell = new Gtk.CellRendererText ();
+        int inserted_at_the_end = -1;
 
-    private void agregar_numero_listbox_numeros ( Array<Salva.Entidad> telefonos ) {
-        string string_numero = "";
-        Gtk.Label label_numero;
-        Telefono row_telefono;
-        for (int i = 0; i < telefonos.length; i++) {
-            row_telefono = telefonos.index (i) as Telefono;
-            string_numero = "Numero: %s (%s)".printf ( row_telefono.numero.to_string () , row_telefono.tipo );
-            label_numero = new Gtk.Label( string_numero );
-            label_numero.set_alignment ( 0, 0);
-            this.listbox_numeros.add ( label_numero );
-            this.hay_numeros_cargados = true;
-        }
+        //Columna "invisible" ID
+        Gtk.TreeViewColumn id_columna_invisible = new Gtk.TreeViewColumn ();
+        id_columna_invisible.set_visible (false);
+        id_columna_invisible.set_expand (false);
+        id_columna_invisible.set_clickable (false);
+        view.insert_column ( id_columna_invisible , 0);
+        //Columnas visibles
+        view.insert_column_with_attributes ( inserted_at_the_end, "Numero", cell, "text", 1 );
+        view.insert_column_with_attributes ( inserted_at_the_end, "Tipo", cell, "text", 2 );
+
+        list_store_telefonos.seleccionado = view.get_selection ();
+        list_store_telefonos.seleccionado.changed.connect ( this.seleccionado_on_changed );
+
+        return view;
     }
 
     public void crear_dialog_agregar_telefono () {
@@ -98,32 +92,30 @@ public class SalvaContactos.TelefonosBox {
         guardar_dialog.show ();
 
         if ( guardar_dialog.run() == ResponseType.APPLY ) {
-            stdout.printf ("APPLY");
+            this.list_store_telefonos.recargar_liststore ();
         }
         guardar_dialog.destroy();
-        this.cargar_numeros ( this.id_contacto_seleccionado );
+        list_store_telefonos.seleccionado.unselect_all ();
+        this.botones_borrar_editar_activar ( false );
     }
 
-    public void cargar_numeros ( uint contacto_id ) {
-        this.id_contacto_seleccionado = contacto_id;
-        this.limpiar_listbox_numeros ();
+    public void crear_dialog_editar_telefono () {
+            editar_dialog = new TelefonoEditarDialog (
+                list_store_telefonos.seleccionado,
+                this.id_contacto_seleccionado);
+            editar_dialog.show ();
 
-        this.crear_listbox_numeros ();
-        Array<Salva.Entidad> telefonos = contacto_dao.get_entidades_relacionadas (
-                new Contacto.Contacto_id ( contacto_id ),
-                telefono_dao );
-
-        if ( telefonos.length > 0 ) {
-            this.agregar_numero_listbox_numeros ( telefonos );
-        }
-
-        this.listbox_numeros.show_all ();
+            if ( editar_dialog.run() == ResponseType.APPLY ) {
+                this.list_store_telefonos.recargar_liststore ();
+            }
+            editar_dialog.destroy();
+            list_store_telefonos.seleccionado.unselect_all ();
+            this.botones_borrar_editar_activar ( false );
     }
 
-    private void on_row_numeros_selected () {
-        if ( listbox_numeros.get_selected_row() != null ) {
-            this.botones_borrar_editar_activar ( true );
-        }
+    public void seleccionado_on_changed () {
+        list_store_telefonos.seleccionar_telefono ( list_store_telefonos.seleccionado );
+        this.botones_borrar_editar_activar ( true );
     }
 
     public void boton_agregar_activar ( bool activar ) {
