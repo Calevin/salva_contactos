@@ -38,7 +38,15 @@ public class SalvaContactos.Application : Gtk.Application {
         N_ITEMS
     }
 
-    public static string db_nombre = "./persistencia/salva_contactos.db";
+    public static Salva.BaseDeDatos base_de_datos;
+
+    public static Salva.BaseDeDatos get_base_de_datos () {
+        if ( Application.base_de_datos == null ) {
+          Application.base_de_datos = new Salva.BaseDeDatos.BaseDeDatos_foreign_keys_activas ( "./persistencia/salva_contactos.db" );
+        }
+
+        return Application.base_de_datos;
+    }
 
     public Application () {
         Object(application_id: "salva.contactos.application",

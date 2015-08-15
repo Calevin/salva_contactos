@@ -38,8 +38,7 @@ public class SalvaContactos.TelefonoAgregarDialog : Dialog {
         this.crear_widgets ();
         this.conectar_signals ();
 
-        this.telefono_dao = new TelefonoDao ();
-        this.telefono_dao.set_db ( new Salva.BaseDeDatos ( Application.db_nombre ) );
+        this.telefono_dao = new TelefonoDao ( Application.get_base_de_datos () );
     }
 
     private void crear_widgets () {

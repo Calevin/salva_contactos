@@ -22,7 +22,10 @@ public class SalvaContactos.TelefonoDao : Salva.EntidadDAO {
     private string _nombre_tabla = "telefonos";
     private string _columnas_tabla = "rowid, numero, tipo, contacto_rowid";
     private Type _tipo_entidad = typeof ( SalvaContactos.Telefono );
-    private Salva.BaseDeDatos _db;
+
+    public TelefonoDao ( Salva.BaseDeDatos db ) {
+        base ( db );
+    }
 
     protected override string[] get_propiedades () {
         return this._propiedades;
@@ -40,11 +43,4 @@ public class SalvaContactos.TelefonoDao : Salva.EntidadDAO {
         return this._tipo_entidad;
     }
 
-    public override void set_db ( Salva.BaseDeDatos db ) {
-        this._db = db;
-    }
-
-    protected override Salva.BaseDeDatos get_db () {
-        return this._db;
-    }
 }

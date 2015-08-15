@@ -38,8 +38,7 @@ public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
         Type[] tipos = { typeof (uint), typeof (string), typeof (string), typeof (string) };
         this.set_column_types ( tipos );
 
-        this.contacto_dao = new ContactoDao ();
-        this.contacto_dao.set_db ( new Salva.BaseDeDatos ( Application.db_nombre ) );
+        this.contacto_dao = new ContactoDao ( Application.get_base_de_datos () );
 
         this.cargar_liststore ();
     }
