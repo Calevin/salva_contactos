@@ -23,7 +23,7 @@ public class SalvaContactos.TelefonoDao : Salva.EntidadDAO {
     private string _columnas_tabla = "rowid, numero, tipo, contacto_rowid";
     private Type _tipo_entidad = typeof ( SalvaContactos.Telefono );
 
-    public TelefonoDao ( Salva.BaseDeDatos db ) {
+    public TelefonoDao ( Salva.IBaseDeDatos db ) {
         base ( db );
     }
 
