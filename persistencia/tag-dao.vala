@@ -17,14 +17,13 @@
  */
 using Salva;
 
-public class SalvaContactos.ContactoDao : Salva.EntidadDAO {
-    private string[] _propiedades = {"id", "nombre", "apellido", "descripcion"};
-    private string _nombre_tabla = "contactos";
-    private string _columnas_tabla = "rowid, nombre, apellido, descripcion";
-    private Type _tipo_entidad = typeof ( SalvaContactos.Contacto );
-    private HashTable<string, string> _relaciones_m2m = new HashTable<string, string> (str_hash, str_equal);
+public class SalvaContactos.TagDao : Salva.EntidadDAO {
+    private string[] _propiedades = {"id", "nombre", "descripcion"};
+    private string _nombre_tabla = "tags";
+    private string _columnas_tabla = "rowid, nombre, descripcion";
+    private Type _tipo_entidad = typeof ( SalvaContactos.Tag );
 
-    public ContactoDao ( Salva.IBaseDeDatos db ) {
+    public TagDao ( Salva.IBaseDeDatos db ) {
         base ( db );
     }
 
@@ -42,11 +41,6 @@ public class SalvaContactos.ContactoDao : Salva.EntidadDAO {
 
     protected override Type get_tipo_entidad () {
         return this._tipo_entidad;
-    }
-
-    protected override HashTable<string, string>? get_relaciones_m2m () {
-        this._relaciones_m2m.insert ( "tags", "contactos_tags" );
-        return this._relaciones_m2m;
     }
 
 }

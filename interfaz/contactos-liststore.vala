@@ -31,11 +31,12 @@ public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
         NOMBRE,
         APELLIDO,
         DESCRIPCION,
+        TAG,
         N_COLUMNAS
     }
 
     public ListStoreContactos () {
-        Type[] tipos = { typeof (uint), typeof (string), typeof (string), typeof (string) };
+        Type[] tipos = { typeof (uint), typeof (string), typeof (string), typeof (string), typeof (string) };
         this.set_column_types ( tipos );
 
         this.contacto_dao = new ContactoDao ( Application.get_base_de_datos () );
@@ -59,7 +60,8 @@ public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
                 COLUMNAS.ID, contacto.id,
                 COLUMNAS.NOMBRE, contacto.nombre,
                 COLUMNAS.APELLIDO, contacto.apellido,
-                COLUMNAS.DESCRIPCION, contacto.descripcion);
+                COLUMNAS.DESCRIPCION, contacto.descripcion,
+                COLUMNAS.TAG, this.listar_tags ( contacto ) );
         }
     }
 
@@ -100,5 +102,29 @@ public class SalvaContactos.ListStoreContactos : Gtk.ListStore {
             model.get (iter, COLUMNAS.ID, out id);
             this.id_contacto_seleccionado = id;
         }
+    }
+
+    public string listar_tags ( Contacto contacto) {
+        var respuesta = new StringBuilder ();
+
+        TagDao tag_dao = new TagDao ( Application.get_base_de_datos () );
+        try {
+            Array<Salva.Entidad> tags = this.contacto_dao.
+                                                get_entidades_relacionadas ( contacto, tag_dao );
+
+            Tag tag;
+            for (int i = 0; i < tags.length; i++) {
+                tag = tags.index (i) as Tag;
+                respuesta.append ( tag.nombre );
+
+                if ((i + 1) < tags.length) {
+                    respuesta.append ( ", ");
+                }
+            }
+        } catch ( BaseDeDatosError e ) {
+            stderr.printf ( "ERROR: %s", e.message );
+        }
+
+        return respuesta.str;
     }
 }

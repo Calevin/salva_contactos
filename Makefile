@@ -11,16 +11,19 @@ SOURCE_FILES_MAIN= \
 	./interfaz/telefonos-box.vala \
 	./interfaz/telefonos-agregar-dialog.vala \
 	./interfaz/telefonos-editar-dialog.vala \
+	./interfaz/toggle-button-personalizado.vala \
 	$(NULL)
 
 SOURCE_FILES_ENTITIES= \
 	./entidades/contacto.vala \
 	./entidades/telefono.vala \
+	./entidades/tag.vala \
 	$(NULL)
 
 SOURCE_FILES_DAOS= \
 	./persistencia/contacto-dao.vala \
 	./persistencia/telefono-dao.vala \
+	./persistencia/tag-dao.vala \
 	$(NULL)
 
 SOURCE_FILES= \

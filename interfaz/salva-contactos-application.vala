@@ -55,7 +55,7 @@ public class SalvaContactos.Application : Gtk.Application {
 
     protected override void activate () {
         Gtk.ApplicationWindow window = new Gtk.ApplicationWindow (this);
-        window.set_default_size (500, 750);
+        window.set_default_size (750, 750);
         window.window_position = Gtk.WindowPosition.CENTER;
         window.set_titlebar ( this.crear_headerbar () );
 
@@ -110,6 +110,7 @@ public class SalvaContactos.Application : Gtk.Application {
         view.insert_column_with_attributes ( inserted_at_the_end, "Nombre", cell, "text", 1 );
         view.insert_column_with_attributes ( inserted_at_the_end, "Apellido", cell, "text", 2 );
         view.insert_column_with_attributes ( inserted_at_the_end, "Descripcion", cell, "text", 3 );
+        view.insert_column_with_attributes ( inserted_at_the_end, "Tag", cell, "text", 4 );
 
         list_store_contactos.seleccionado = view.get_selection ();
         list_store_contactos.seleccionado.changed.connect ( this.seleccionado_on_changed );
